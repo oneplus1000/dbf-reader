@@ -9,9 +9,11 @@ class DbfReader {
             let fields = new Array();
             let i = 0;
             do {
-                byteRead = DbfReader.fileHeaderSize + (i * DbfReader.fieldDescriptorSize) + 1;
+                byteRead =
+                    DbfReader.fileHeaderSize + i * DbfReader.fieldDescriptorSize + 1;
                 let fieldNameLength = 0;
-                while (iconv_lite_1.decode(Buffer.from(dbaseFile.subarray(byteRead + fieldNameLength, byteRead + fieldNameLength + 1)), encoding) != "\u0000" && fieldNameLength < 11) {
+                while (iconv_lite_1.decode(Buffer.from(dbaseFile.subarray(byteRead + fieldNameLength, byteRead + fieldNameLength + 1)), encoding) != "\u0000" &&
+                    fieldNameLength < 11) {
                     fieldNameLength += 1;
                 }
                 let fieldName = iconv_lite_1.decode(Buffer.from(dbaseFile.subarray(byteRead, byteRead + fieldNameLength)), encoding);
@@ -39,7 +41,7 @@ class DbfReader {
                 let year = value.substr(0, 4);
                 let month = value.substr(4, 2);
                 let date = value.substr(6, 2);
-                return new Date(+year, +month, +date);
+                return new Date(+year, +month - 1, +date);
             }
         }
         catch (error) {
@@ -57,7 +59,8 @@ class DbfReader {
                     value = value;
                     break;
                 case "v":
-                    while (iconv_lite_1.decode(Buffer.from(valueBuffer.subarray(byteRead + valueLength, byteRead + valueLength + 1)), encoding) != "\u0000" && valueLength < fieldlength) {
+                    while (iconv_lite_1.decode(Buffer.from(valueBuffer.subarray(byteRead + valueLength, byteRead + valueLength + 1)), encoding) != "\u0000" &&
+                        valueLength < fieldlength) {
                         valueLength += 1;
                     }
                     value = iconv_lite_1.decode(Buffer.from(valueBuffer.subarray(byteRead, byteRead + valueLength)), encoding).trim();
@@ -85,8 +88,13 @@ class DbfReader {
                     value = valueBuffer.readIntLE(0, valueBuffer.byteLength);
                     break;
                 case "y":
-                    let currency = valueBuffer.readIntLE(0, valueBuffer.byteLength).toString();
-                    currency = currency.substr(0, currency.length - decimalCount) + "." + currency.substr(currency.length - decimalCount, currency.length - 4);
+                    let currency = valueBuffer
+                        .readIntLE(0, valueBuffer.byteLength)
+                        .toString();
+                    currency =
+                        currency.substr(0, currency.length - decimalCount) +
+                            "." +
+                            currency.substr(currency.length - decimalCount, currency.length - 4);
                     value = +currency;
                     break;
                 case "b":
@@ -112,10 +120,10 @@ class DbfReader {
         l = jd + 68569;
         n = Math.floor(Math.floor(4 * l) / 146097);
         l = l - Math.floor((146097 * n + 3) / 4);
-        i = Math.floor(4000 * (l + 1) / 1461001);
-        l = l - Math.floor(1461 * i / 4) + 31;
-        j = Math.floor(80 * l / 2447);
-        k = l - Math.floor(2447 * j / 80);
+        i = Math.floor((4000 * (l + 1)) / 1461001);
+        l = l - Math.floor((1461 * i) / 4) + 31;
+        j = Math.floor((80 * l) / 2447);
+        k = l - Math.floor((2447 * j) / 80);
         l = Math.floor(j / 11);
         j = j + 2 - 12 * l;
         i = 100 * (n - 49) + i + l;
@@ -153,7 +161,8 @@ class DbfReader {
                     break;
                 // case "q": typeName = "binary";
                 //     break;
-                default: typeName = "notsupported";
+                default:
+                    typeName = "notsupported";
             }
         }
         catch (error) {
@@ -202,7 +211,7 @@ class DbfReader {
                 let row = {};
                 if (iconv_lite_1.decode(Buffer.from(dbaseFile.subarray(byteRead, byteRead + 1)), encoding) == " ") {
                     byteRead = byteRead + 1;
-                    fields.forEach(col => {
+                    fields.forEach((col) => {
                         let type = DbfReader.getTypeName(col.fieldType);
                         if (col.fieldLength < 0) {
                             col.fieldLength = 256 + col.fieldLength;
@@ -222,7 +231,7 @@ class DbfReader {
                 }
                 else {
                     byteRead = byteRead + 1;
-                    fields.forEach(col => {
+                    fields.forEach((col) => {
                         byteRead = byteRead + col.fieldLength;
                     });
                 }
